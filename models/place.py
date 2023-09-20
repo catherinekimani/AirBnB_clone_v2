@@ -3,6 +3,8 @@
 from models.base_model import BaseModel, Base
 from sqlalchemy import Column, String, Integer, Float, ForeignKey, Table
 from sqlalchemy.orm import relationship
+from models.amenity import Amenity
+from models.review import Review
 
 
 place_amenity = Table(
@@ -32,3 +34,31 @@ class Place(BaseModel, Base):
                              secondary=place_amenity,
                              viewonly=False
                              )
+
+    @property
+    def reviews(self):
+        """Returns the reviews of this Place"""
+
+        from models import storage
+        reviews_of_place = []
+        for value in storage.all(Review).values():
+            if value.place_id == self.id:
+                reviews_of_place.append(value)
+        return reviews_of_place
+
+    @property
+    def amenities(self):
+        """Returns the amenities of this Place"""
+
+        from models import storage
+        amenities_of_place = []
+        for value in storage.all(Amenity).values():
+            if value.id in self.amenity_ids:
+                amenities_of_place.append(value)
+            return amenities_of_place
+
+    def amenities(self, value):
+        """Adds an amenity to this Place"""
+        if type(value) is Amenity:
+            if value.id not in self.amenity_ids:
+                self.amenity_ids.append(value.id)
