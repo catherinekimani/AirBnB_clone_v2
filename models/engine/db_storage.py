@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from models.base_model import BaseModel, Base
 from models.review import Review
 from models.amenity import Amenity
-from models.place import Place, place_amenity
+from models.place import Place
 from models.user import User
 from models.city import City
 from models.state import State
@@ -21,12 +21,12 @@ class DBStorage:
     def __init__(self):
         """Initializes SQL database storage"""
         user = os.getenv('HBNB_MYSQL_USER')
-        pwrd = os.getenv('HBNB_MYSQL_PWD')
+        pword = os.getenv('HBNB_MYSQL_PWD')
         host = os.getenv('HBNB_MYSQL_HOST')
         db_name = os.getenv('HBNB_MYSQL_DB')
         env = os.getenv('HBNB_ENV')
         DATABASE_URL = "mysql+mysqldb://{}:{}@{}:3306/{}".format(
-            user, pwrd, host, db_name
+            user, pword, host, db_name
         )
         self.__engine = create_engine(
             DATABASE_URL,
