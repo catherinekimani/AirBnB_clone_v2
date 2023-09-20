@@ -134,7 +134,7 @@ class HBNBCommand(cmd.Cmd):
                 else:
                     value = int(value)
 
-                 obj_params[key] = value
+                obj_params[key] = value
             except ValueError:
                 pass
 
@@ -142,7 +142,7 @@ class HBNBCommand(cmd.Cmd):
             obj = class_def(**obj_params)
             print(f"Created object with parameters")
         except Exception as e:
-            print(f"Error creating object")	
+            print(f"Error creating object")
 
         if not args:
             print("** class name missing **")
@@ -348,6 +348,7 @@ class HBNBCommand(cmd.Cmd):
         """ Help information for the update class """
         print("Updates an object with new information")
         print("Usage: update <className> <id> <attName> <attVal>\n")
+
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
