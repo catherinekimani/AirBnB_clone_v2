@@ -21,7 +21,7 @@ class DBStorage:
     def __init__(self):
         """Initializes SQL database storage"""
         user = os.getenv('HBNB_MYSQL_USER')
-        pword = os.getenv('HBNB_MYSQL_PWD')
+        pwrd = os.getenv('HBNB_MYSQL_PWD')
         host = os.getenv('HBNB_MYSQL_HOST')
         db_name = os.getenv('HBNB_MYSQL_DB')
         env = os.getenv('HBNB_ENV')
