@@ -7,15 +7,6 @@ from models.amenity import Amenity
 from models.review import Review
 
 
-place_amenity = Table('place_amenity', Base.metadata,
-                      Column('place_id', String(60), ForeignKey('places.id'),
-                             primary_key=True, nullable=False),
-                      Column('amenity_id', String(60),
-                             ForeignKey('amenities.id'), primary_key=True,
-                             nullable=False)
-                      )
-
-
 class Place(BaseModel, Base):
     """ A place to stay """
 
@@ -32,35 +23,3 @@ class Place(BaseModel, Base):
     longitude = Column(Float)
     amenity_ids = []
     reviews = relationship("Review", backref="place", cascade="all, delete")
-    amenities = relationship("Amenity",
-                             secondary=place_amenity,
-                             viewonly=False
-                             )
-
-    @property
-    def reviews(self):
-        """Returns the reviews of this Place"""
-
-        from models import storage
-        reviews_of_place = []
-        for value in storage.all(Review).values():
-            if value.place_id == self.id:
-                reviews_of_place.append(value)
-        return reviews_of_place
-
-    @property
-    def amenities(self):
-        """Returns the amenities of this Place"""
-
-        from models import storage
-        amenities_of_place = []
-        for value in storage.all(Amenity).values():
-            if value.id in self.amenity_ids:
-                amenities_of_place.append(value)
-            return amenities_of_place
-
-    def amenities(self, value):
-        """Adds an amenity to this Place"""
-        if type(value) is Amenity:
-            if value.id not in self.amenity_ids:
-                self.amenity_ids.append(value.id)
