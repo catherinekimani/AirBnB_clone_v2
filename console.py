@@ -121,9 +121,9 @@ class HBNBCommand(cmd.Cmd):
             return
 
         obj_params = {}
-        for par in params:
+        for param in params:
             try:
-                key, value = par.split('=')
+                key, value = param.split('=')
                 key = key.strip()
                 value = value.strip()
 
