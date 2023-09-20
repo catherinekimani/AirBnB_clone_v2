@@ -57,7 +57,7 @@ class Place(BaseModel, Base):
         for value in storage.all(Amenity).values():
             if value.id in self.amenity_ids:
                 amenities_of_place.append(value)
-            return amenities_of_place
+        return amenities_of_place
 
     def amenities(self, value):
         """Adds an amenity to this Place"""
