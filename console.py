@@ -2,6 +2,7 @@
 """ Console Module """
 import cmd
 import sys
+import re
 from models.base_model import BaseModel
 from models.__init__ import storage
 from models.user import User
@@ -10,6 +11,17 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
+
+
+def convert_value(value):
+    """ convert  a string value """
+    if re.match(r'^".*"$', value):
+        return value.replace("_", " ").replace("\"", "")
+    elif "." in value:
+        return float(value)
+    elif re.match(r"\d+", value):
+        return int(value)
+    return value
 
 
 class HBNBCommand(cmd.Cmd):
@@ -114,46 +126,32 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
-        """ Create an object of any class"""
-        args = arg.split()
-        if len(args) < 2:
-            print("create <Class name> <param 1> <param 2> <param 3>...")
-            return
+        """  allow for object creation with given parameters """
 
-        obj_params = {}
-        for par in params:
-            try:
-                key, value = par.split('=')
-                key = key.strip()
-                value = value.strip()
-
-                if value.startswith('"') and value.endswith('"'):
-                    value = value[1:-1].replace('\\"', '"').replace('_', ' ')
-                elif '.' in value:
-                    value = float(value)
-                else:
-                    value = int(value)
-
-                obj_params[key] = value
-            except ValueError:
-                pass
-
-        try:
-            obj = class_def(**obj_params)
-            print(f"Created object with parameters")
-        except Exception as e:
-            print(f"Error creating object")
-
-        if not args:
+        if len(args) == 0:
             print("** class name missing **")
             return
-        elif args not in HBNBCommand.classes:
+
+        class_name, *att_args = args.split()
+
+        if class_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-        new_instance = HBNBCommand.classes[args]()
-        storage.save()
-        print(new_instance.id)
-        storage.save()
+
+        new_ins = HBNBCommand.classes[class_name]()
+
+        for arg in att_args:
+            key, value = arg.split('=')
+
+            try:
+                setattr(new_ins, key, convert_value(value))
+            except AttributeError:
+                print(
+                    f"Attribute '{key}' doesn't exist in class '{class_name}'"
+                )
+
+        new_ins.save()
+        print(new_ins.id)
 
     def help_create(self):
         """ Help information for the create method """
