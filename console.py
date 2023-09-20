@@ -115,6 +115,35 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """ Create an object of any class"""
+        args = arg.split()
+        if len(args) < 2:
+            print("create <Class name> <param 1> <param 2> <param 3>...")
+            return
+
+        obj_params = {}
+        for par in params:
+            try:
+                key, value = par.split('=')
+                key = key.strip()
+                value = value.strip()
+
+                if value.startswith('"') and value.endswith('"'):
+                    value = value[1:-1].replace('\\"', '"').replace('_', ' ')
+                elif '.' in value:
+                    value = float(value)
+                else:
+                    value = int(value)
+
+                 obj_params[key] = value
+            except ValueError:
+                pass
+
+        try:
+            obj = class_def(**obj_params)
+            print(f"Created object with parameters")
+        except Exception as e:
+            print(f"Error creating object")	
+
         if not args:
             print("** class name missing **")
             return
