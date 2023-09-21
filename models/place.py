@@ -1,10 +1,8 @@
 #!/usr/bin/python3
 """ Place Module for HBNB project """
-from models.amenity import Amenity
 from models.base_model import BaseModel, Base
 from sqlalchemy import Column, String, Integer, ForeignKey, Float, Table
 from sqlalchemy.orm import relationship
-from models.review import Review
 
 
 place_amenity = Table('place_amenity', Base.metadata,
@@ -29,37 +27,9 @@ class Place(BaseModel, Base):
     price_by_night = Column(Integer, nullable=False, default=0)
     latitude = Column(Float)
     longitude = Column(Float)
-    p_reviews = relationship("Review", backref='place', cascade="all, delete")
-    p_amenities = relationship(
+    reviews = relationship("Review", backref='place', cascade="all, delete")
+    amenities = relationship(
                                "Amenity",
                                secondary=place_amenity,
                                viewonly=False
                                )
-
-    @property
-    def reviews(self):
-        """Returns the reviews of this Place"""
-
-        from models import storage
-        reviews_of_place = []
-        for value in storage.all(Review).values():
-            if value.place_id == self.id:
-                reviews_of_place.append(value)
-        return reviews_of_place
-
-    @property
-    def amenities(self):
-        """Returns the amenities of this Place"""
-
-        from models import storage
-        amenities_of_place = []
-        for value in storage.all(Amenity).values():
-            if value.id in self.amenity_ids:
-                amenities_of_place.append(value)
-        return amenities_of_place
-
-    def amenities(self, value):
-        """Adds an amenity to this Place"""
-        if type(value) is Amenity:
-            if value.id not in self.amenity_ids:
-                self.amenity_ids.append(value.id)
