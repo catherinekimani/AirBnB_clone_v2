@@ -2,7 +2,6 @@
 """ Console Module """
 import cmd
 import sys
-import re
 from models.base_model import BaseModel
 from models.__init__ import storage
 from models.user import User
@@ -11,17 +10,6 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
-
-
-def convert_value(value):
-    """ convert  a string value """
-    if re.match(r'^".*"$', value):
-        return value.replace("_", " ").replace("\"", "")
-    elif "." in value:
-        return float(value)
-    elif re.match(r"\d+", value):
-        return int(value)
-    return value
 
 
 class HBNBCommand(cmd.Cmd):
@@ -85,7 +73,7 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
-                    if pline[0] == '{' and pline[-1] =='}'\
+                    if pline[0] == '{' and pline[-1] == '}'\
                             and type(eval(pline)) is dict:
                         _args = pline
                     else:
@@ -127,31 +115,27 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """  allow for object creation with given parameters """
-
-        if len(args) == 0:
+        try:
+            if not args:
+                raise SyntaxError()
+            split_arg = args.split(' ')
+            new_instance = eval('{}()'.format(split_arg[0]))
+            params = split_arg[1:]
+            for param in params:
+                key, value = param.split('=')
+                try:
+                    attribute = HBNBCommand.validate_attr(value)
+                except Exception as e:
+                    continue
+                if not attribute:
+                    continue
+                setattr(new_instance, key, attribute)
+            new_instance.save()
+            print(new_instance.id)
+        except SyntaxError:
             print("** class name missing **")
-            return
-
-        class_name, *att_args = args.split()
-
-        if class_name not in HBNBCommand.classes:
+        except NameError as e:
             print("** class doesn't exist **")
-            return
-
-        new_ins = HBNBCommand.classes[class_name]()
-
-        for arg in att_args:
-            key, value = arg.split('=')
-
-            try:
-                setattr(new_ins, key, convert_value(value))
-            except AttributeError:
-                print(
-                    f"Attribute '{key}' doesn't exist in class '{class_name}'"
-                )
-
-        new_ins.save()
-        print(new_ins.id)
 
     def help_create(self):
         """ Help information for the create method """
@@ -214,7 +198,7 @@ class HBNBCommand(cmd.Cmd):
         key = c_name + "." + c_id
 
         try:
-            del(storage.all()[key])
+            del (storage.all()[key])
             storage.save()
         except KeyError:
             print("** no instance found **")
@@ -342,6 +326,22 @@ class HBNBCommand(cmd.Cmd):
                 new_dict.__dict__.update({att_name: att_val})
 
         new_dict.save()  # save updates to file
+
+    @classmethod
+    def validate_attr(cls, attribute):
+        """
+        check if attribute is formatted correctly
+        """
+        if attribute[0] is attribute[-1] in ['"', "'"]:
+            return attribute.strip('"\'').replace('_', ' ').replace('\\', '"')
+        else:
+            try:
+                try:
+                    return int(attribute)
+                except ValueError:
+                    return float(attribute)
+            except ValueError:
+                return None
 
     def help_update(self):
         """ Help information for the update class """
