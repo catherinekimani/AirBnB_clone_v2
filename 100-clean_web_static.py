@@ -1,22 +1,21 @@
 #!/usr/bin/python3
 """
-fab script that creates and distributes an archive to
-your web servers, using the function deploy:
+script deletes out-of-date archives
 """
-
 
 import os
 from fabric.api import *
 from datetime import datetime
 
 
-# Set the host IP
+# Set the host IP addresses for web-01 && web-02
 env.hosts = ['54.157.141.67', '100.25.169.176']
 
 
 def do_pack():
-    """Create a tar gzipped archive of the directory web_static."""
-    # current date and time
+    """Create a tar gzipped archive"""
+
+    # obtain the current date and time
     now = datetime.now().strftime("%Y%m%d%H%M%S")
 
     # path where archive will be saved
@@ -53,3 +52,37 @@ def do_deploy(archive_path):
         run("ln -s {} /data/web_static/current".format(f_path))
         return True
     return False
+
+
+def deploy():
+    """
+    Create and archive and get its path
+    """
+    archive_path = do_pack()
+    if archive_path is None:
+        return False
+    return do_deploy(archive_path)
+
+
+def do_clean(number=0):
+    """
+    Delete out-of-date archives of the static files.
+    """
+    archives = os.listdir('versions/')
+    archives.sort(reverse=True)
+    start = int(number)
+    if not start:
+        start += 1
+    if start < len(archives):
+        archives = archives[start:]
+    else:
+        archives = []
+    for archive in archives:
+        os.unlink('versions/{}'.format(archive))
+    cmd_parts = [
+        "rm -rf $(",
+        "find /data/web_static/releases/ -maxdepth 1 -type d -iregex",
+        " '/data/web_static/releases/web_static_.*'",
+        " | sort -r | tr '\\n' ' ' | cut -d ' ' -f{}-)".format(start + 1)
+    ]
+    run(''.join(cmd_parts))
