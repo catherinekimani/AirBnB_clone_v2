@@ -22,3 +22,7 @@ def hbnb_filters():
         '100-hbnb.html',
         states=storage.all(State), amenities=storage.all(Amenity),
         places=storage.all(Place))
+
+
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=5000)
