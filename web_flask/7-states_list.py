@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 
 @app.teardown_appcontext
-def teardown(exception):
+def teardown(self):
     """ Tear down db """
     if storage is not None:
         storage.close()
@@ -18,8 +18,7 @@ def teardown(exception):
 @app.route('/states_list', strict_slashes=False)
 def states_list():
     """ List of state ids """
-    states = storage.all(State)
-    return render_template('7-states_list.html', states=states())
+    return render_template('7-states_list.html', states=storage.all(State))
 
 
 if __name__ == '__main__':

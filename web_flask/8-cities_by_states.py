@@ -7,15 +7,16 @@ from models.state import State
 app = Flask(__name__)
 
 
+@app.teardown_appcontext
+def teardown(self):
+    storage.close()
+
+
+@app.route('/cities_by_states', strict_slashes=False)
 def cities_by_state():
     """ Html page with a list of states and cities """
-    states = storage.all(State)
-    return render_template('8-cities_by_states.html', states=states)
-
-
-@app.teardown_appcontext
-def teardown(exception):
-    storage.close()
+    return render_template(
+        '8-cities_by_states.html', states=storage.all(State))
 
 
 if __name__ == '__main__':
